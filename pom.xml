@@ -10,7 +10,7 @@
 
     <groupId>io.katharsis</groupId>
     <artifactId>katharsis-parent</artifactId>
-    <version>3.0.4-SNAPSHOT</version>
+    <version>3.0.4-RIGO-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Katharsis build POM</name>
@@ -283,7 +283,7 @@
                 <module>katharsis-client</module>
                 <module>katharsis-meta</module>
                 <module>katharsis-jpa</module>
-                <module>katharsis-examples</module>
+                <!-- <module>katharsis-examples</module> -->
             </modules>
         </profile>
         <profile>

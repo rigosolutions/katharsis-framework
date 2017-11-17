@@ -1,6 +1,6 @@
 package io.katharsis.resource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -20,15 +20,38 @@ public class ResourceInformationTest {
 	public void onRelationshipFieldSearchShouldReturnExistingField() throws NoSuchFieldException {
 		// GIVEN
 		Field field = String.class.getDeclaredField("value");
-		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, field.getType(), field.getGenericType(), null);
-		ResourceField resourceField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP, field.getType(), field.getGenericType(), "projects");
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, field.getType(),
+				field.getGenericType(), null);
+		ResourceField resourceField = new ResourceFieldImpl("value", "value", ResourceFieldType.RELATIONSHIP,
+				field.getType(), field.getGenericType(), "projects");
 		TypeParser typeParser = new TypeParser();
-		ResourceInformation sut = new ResourceInformation(typeParser, Task.class, "tasks", null, Arrays.asList(idField, resourceField));
+		ResourceInformation sut = new ResourceInformation(typeParser, Task.class, "tasks", null,
+				Arrays.asList(idField, resourceField));
 
 		// WHEN
 		ResourceField result = sut.findRelationshipFieldByName("value");
 
 		// THEN
 		assertThat(result.getUnderlyingName()).isEqualTo(field.getName());
+	}
+
+	@Test
+	public void onRelationshipFieldSearchByUnderlyingNameShouldReturnExistingField() throws NoSuchFieldException {
+		// GIVEN
+		Field field = String.class.getDeclaredField("value");
+		ResourceField idField = new ResourceFieldImpl("id", "id", ResourceFieldType.ID, field.getType(),
+				field.getGenericType(), null);
+		// use kebab-case for test
+		ResourceField resourceField = new ResourceFieldImpl("assembled-value", "assembledValue",
+				ResourceFieldType.RELATIONSHIP, field.getType(), field.getGenericType(), "projects");
+		TypeParser typeParser = new TypeParser();
+		ResourceInformation sut = new ResourceInformation(typeParser, Task.class, "tasks", null,
+				Arrays.asList(idField, resourceField));
+
+		// WHEN
+		ResourceField result = sut.findRelationshipFieldByUnderlyingName("assembledValue");
+
+		// THEN
+		assertThat(result.getUnderlyingName()).isEqualTo(resourceField.getUnderlyingName());
 	}
 }

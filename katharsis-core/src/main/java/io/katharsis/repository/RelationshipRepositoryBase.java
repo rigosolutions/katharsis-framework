@@ -31,8 +31,7 @@ import io.katharsis.resource.registry.ResourceRegistryAware;
 /**
  * Recommended base class to implement a relationship repository making use of
  * the QuerySpec and ResourceList. Note that the former
- * {@link RelationshipRepositoryBase} will be removed in the near
- * future.
+ * {@link RelationshipRepositoryBase} will be removed in the near future.
  * 
  * Base implementation for {@link RelationshipRepositoryV2} implementing
  * <b>ALL</b> of the methods. Makes use of the source and target resource
@@ -60,7 +59,8 @@ import io.katharsis.resource.registry.ResourceRegistryAware;
  * @param <J>
  *            target identity type
  */
-public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable> implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
+public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends Serializable>
+		implements BulkRelationshipRepositoryV2<T, I, D, J>, ResourceRegistryAware {
 
 	private ResourceRegistry resourceRegistry;
 
@@ -170,6 +170,7 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		return (Iterable<D>) targetAdapter.findAll(targetIds, queryAdapter).getEntity();
 	}
 
+	@Override
 	@SuppressWarnings("unchecked")
 	public MultivaluedMap<I, D> findTargets(Iterable<I> sourceIds, String fieldName, QuerySpec querySpec) {
 		RegistryEntry sourceEntry = resourceRegistry.findEntry(sourceResourceClass);
@@ -177,7 +178,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 
 		String oppositeName = getOppositeName(fieldName);
 		QuerySpec idQuerySpec = querySpec.duplicate();
-		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getJsonName()), FilterOperator.EQ, sourceIds));
+		idQuerySpec.addFilter(new FilterSpec(Arrays.asList(oppositeName, sourceInformation.getIdField().getJsonName()),
+				FilterOperator.EQ, sourceIds));
 		idQuerySpec.includeRelation(Arrays.asList(oppositeName));
 
 		ResourceRepositoryAdapter<D, J> targetAdapter = getTargetAdapter();
@@ -204,10 +206,12 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	}
 
 	@SuppressWarnings("unchecked")
-	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, String oppositeName, ResourceInformation sourceInformation) {
+	private void handleTarget(MultivaluedMap<I, D> bulkResult, D result, Set<I> sourceIdSet, String oppositeName,
+			ResourceInformation sourceInformation) {
 		Object property = PropertyUtils.getProperty(result, oppositeName);
 		if (property == null) {
-			throw new IllegalStateException("field " + oppositeName + " is null for " + result + ", make sure to properly implement relationship inclusions");
+			throw new IllegalStateException("field " + oppositeName + " is null for " + result
+					+ ", make sure to properly implement relationship inclusions");
 		}
 		if (property instanceof Iterable) {
 			for (T potentialSource : (Iterable<T>) property) {
@@ -224,7 +228,8 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 		} else {
 			T source = (T) property;
 			I sourceId = (I) sourceInformation.getId(source);
-			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository", sourceIdSet.contains(sourceId));
+			PreconditionUtil.assertTrue("filtering not properly implemented in resource repository",
+					sourceIdSet.contains(sourceId));
 			if (sourceId == null) {
 				throw new IllegalStateException("id is null for " + source);
 			}
@@ -235,13 +240,15 @@ public class RelationshipRepositoryBase<T, I extends Serializable, D, J extends 
 	protected String getOppositeName(String fieldName) {
 		RegistryEntry entry = resourceRegistry.findEntry(sourceResourceClass);
 		ResourceInformation resourceInformation = entry.getResourceInformation();
-		ResourceField field = resourceInformation.findRelationshipFieldByName(fieldName);
+		ResourceField field = resourceInformation.findRelationshipFieldByUnderlyingName(fieldName);
 		if (field == null) {
-			throw new IllegalStateException("field " + sourceResourceClass.getSimpleName() + "." + fieldName + " not found");
+			throw new IllegalStateException(
+					"field " + sourceResourceClass.getSimpleName() + "." + fieldName + " not found");
 		}
 		String oppositeName = field.getOppositeName();
 		if (oppositeName == null) {
-			throw new IllegalStateException("no opposite specified for field " + sourceResourceClass.getSimpleName() + "." + fieldName);
+			throw new IllegalStateException(
+					"no opposite specified for field " + sourceResourceClass.getSimpleName() + "." + fieldName);
 		}
 		return oppositeName;
 	}

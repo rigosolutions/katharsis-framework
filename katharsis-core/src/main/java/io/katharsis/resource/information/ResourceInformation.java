@@ -74,12 +74,14 @@ public class ResourceInformation {
 	 */
 	private String superResourceType;
 
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType, List<ResourceField> fields) {
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+			List<ResourceField> fields) {
 		this(parser, resourceClass, resourceType, superResourceType, null, fields);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType, ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
+	public ResourceInformation(TypeParser parser, Class<?> resourceClass, String resourceType, String superResourceType,
+			ResourceInstanceBuilder<?> instanceBuilder, List<ResourceField> fields) {
 		this.parser = parser;
 		this.resourceClass = resourceClass;
 		this.resourceType = resourceType;
@@ -97,7 +99,8 @@ public class ResourceInformation {
 
 			this.idField = idFields.get(0);
 
-			this.attributeFields = new ResourceAttributesBridge(ResourceFieldType.ATTRIBUTE.filter(fields), resourceClass);
+			this.attributeFields = new ResourceAttributesBridge(ResourceFieldType.ATTRIBUTE.filter(fields),
+					resourceClass);
 			this.relationshipFields = ResourceFieldType.RELATIONSHIP.filter(fields);
 
 			this.metaField = getMetaField(resourceClass, fields);
@@ -153,8 +156,8 @@ public class ResourceInformation {
 	public String getResourceType() {
 		return resourceType;
 	}
-	
-	public String getSuperResourceType(){
+
+	public String getSuperResourceType() {
 		return superResourceType;
 	}
 
@@ -182,6 +185,10 @@ public class ResourceInformation {
 		return getJsonField(name, relationshipFields);
 	}
 
+	public ResourceField findRelationshipFieldByUnderlyingName(String name) {
+		return getJsonFieldbyUnderlying(name, relationshipFields);
+	}
+
 	public ResourceField findAttributeFieldByName(String name) {
 		return getJsonField(name, attributeFields.getFields());
 	}
@@ -190,6 +197,17 @@ public class ResourceInformation {
 		ResourceField foundField = null;
 		for (ResourceField field : fields) {
 			if (field.getJsonName().equals(name)) {
+				foundField = field;
+				break;
+			}
+		}
+		return foundField;
+	}
+
+	private static ResourceField getJsonFieldbyUnderlying(String underlyingName, List<ResourceField> fields) {
+		ResourceField foundField = null;
+		for (ResourceField field : fields) {
+			if (field.getUnderlyingName().equals(underlyingName)) {
 				foundField = field;
 				break;
 			}
@@ -233,13 +251,16 @@ public class ResourceInformation {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		ResourceInformation that = (ResourceInformation) o;
-		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType) && Objects.equals(idField, that.idField) && Objects.equals(attributeFields, that.attributeFields)
-				&& Objects.equals(relationshipFields, that.relationshipFields) && Objects.equals(metaField, that.metaField) && Objects.equals(linksField, that.linksField);
+		return Objects.equals(resourceClass, that.resourceClass) && Objects.equals(resourceType, that.resourceType)
+				&& Objects.equals(idField, that.idField) && Objects.equals(attributeFields, that.attributeFields)
+				&& Objects.equals(relationshipFields, that.relationshipFields)
+				&& Objects.equals(metaField, that.metaField) && Objects.equals(linksField, that.linksField);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(resourceClass, resourceType, idField, attributeFields, relationshipFields, metaField, linksField);
+		return Objects.hash(resourceClass, resourceType, idField, attributeFields, relationshipFields, metaField,
+				linksField);
 	}
 
 	/**
