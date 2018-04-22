@@ -13,4 +13,27 @@
             <password>${env.SONATYPE_PASSWORD}</password>
         </server>
     </servers>
+    <profiles>
+        <profile>
+            <id>rigo</id>
+            <repositories>
+                <repository>
+                    <id>rigoInternal</id>
+                    <name>Rigo Internal</name>
+                    <releases>
+                        <enabled>true</enabled>
+                        <updatePolicy>always</updatePolicy>
+                        <checksumPolicy>warn</checksumPolicy>
+                    </releases>
+                    <snapshots>
+                        <enabled>true</enabled>
+                        <updatePolicy>never</updatePolicy>
+                        <checksumPolicy>fail</checksumPolicy>
+                    </snapshots>
+                    <url>http://www.saddleup.io:8082/repository/maven-public/</url>
+                    <layout>default</layout>
+                </repository>
+            </repositories>
+        </profile>
+    </profiles>
 </settings>
