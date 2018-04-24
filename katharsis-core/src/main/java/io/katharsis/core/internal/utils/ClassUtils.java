@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,9 +23,11 @@ public class ClassUtils {
 	}
 
 	/**
-	 * Returns a list of class fields. Supports inheritance and doesn't return synthetic fields.
+	 * Returns a list of class fields. Supports inheritance and doesn't return
+	 * synthetic fields.
 	 *
-	 * @param beanClass class to be searched for
+	 * @param beanClass
+	 *            class to be searched for
 	 * @return a list of found fields
 	 */
 	public static List<Field> getClassFields(Class<?> beanClass) {
@@ -49,9 +52,12 @@ public class ClassUtils {
 	/**
 	 * Returns an instance of bean's annotation
 	 *
-	 * @param beanClass       class to be searched for
-	 * @param annotationClass type of an annotation
-	 * @param <T>             type of an annotation
+	 * @param beanClass
+	 *            class to be searched for
+	 * @param annotationClass
+	 *            type of an annotation
+	 * @param <T>
+	 *            type of an annotation
 	 * @return an instance of an annotation
 	 */
 	public static <T extends Annotation> Optional<T> getAnnotation(Class<?> beanClass, Class<T> annotationClass) {
@@ -67,10 +73,13 @@ public class ClassUtils {
 	}
 
 	/**
-	 * Tries to find a class fields. Supports inheritance and doesn't return synthetic fields.
+	 * Tries to find a class fields. Supports inheritance and doesn't return
+	 * synthetic fields.
 	 *
-	 * @param beanClass class to be searched for
-	 * @param fieldName field name
+	 * @param beanClass
+	 *            class to be searched for
+	 * @param fieldName
+	 *            field name
 	 * @return a list of found fields
 	 */
 	public static Field findClassField(Class<?> beanClass, String fieldName) {
@@ -94,12 +103,12 @@ public class ClassUtils {
 	public static Method findGetter(Class<?> beanClass, String fieldName) {
 		String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 		try {
-		    return beanClass.getMethod("get" + upperCaseName);
+			return beanClass.getMethod("get" + upperCaseName);
 		} catch (NoSuchMethodException e) {
 			try {
 				Method method = beanClass.getMethod("is" + upperCaseName);
 				Class<?> returnType = method.getReturnType();
-				if(returnType == Boolean.class || returnType == boolean.class){
+				if (returnType == Boolean.class || returnType == boolean.class) {
 					return method;
 				}
 				return null;
@@ -108,30 +117,33 @@ public class ClassUtils {
 			}
 		}
 	}
-	
-	public static Method findSetter(Class<?> beanClass, String fieldName, Class<?> fieldType) {
-        String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
-        try{
-        	return beanClass.getMethod("set" + upperCaseName, fieldType);
-        } catch (NoSuchMethodException e1) {
+	public static Method findSetter(Class<?> beanClass, String fieldName, Class<?> fieldType) {
+		String upperCaseName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+
+		try {
+			return beanClass.getMethod("set" + upperCaseName, fieldType);
+		} catch (NoSuchMethodException e1) {
 			return null;
 		}
-    }
+	}
 
 	/**
 	 * <p>
-	 * Return a list of class getters. Supports inheritance and overriding, that is when a method is found on the
-	 * lowest level of inheritance chain, no other method can override it. Supports inheritance and
-	 * doesn't return synthetic methods.
+	 * Return a list of class getters. Supports inheritance and overriding, that
+	 * is when a method is found on the lowest level of inheritance chain, no
+	 * other method can override it. Supports inheritance and doesn't return
+	 * synthetic methods.
 	 * <p>
 	 * A getter:
 	 * <ul>
-	 * <li>Starts with an <i>is</i> if returns <i>boolean</i> or {@link Boolean} value</li>
+	 * <li>Starts with an <i>is</i> if returns <i>boolean</i> or {@link Boolean}
+	 * value</li>
 	 * <li>Starts with a <i>get</i> if returns non-boolean value</li>
 	 * </ul>
 	 *
-	 * @param beanClass class to be searched for
+	 * @param beanClass
+	 *            class to be searched for
 	 * @return a list of found getters
 	 */
 	public static List<Method> getClassGetters(Class<?> beanClass) {
@@ -156,11 +168,13 @@ public class ClassUtils {
 	}
 
 	/**
-	 * Return a list of class setters. Supports inheritance and overriding, that is when a method is found on the
-	 * lowest level of inheritance chain, no other method can override it.  Supports inheritance
-	 * and doesn't return synthetic methods.
+	 * Return a list of class setters. Supports inheritance and overriding, that
+	 * is when a method is found on the lowest level of inheritance chain, no
+	 * other method can override it. Supports inheritance and doesn't return
+	 * synthetic methods.
 	 *
-	 * @param beanClass class to be searched for
+	 * @param beanClass
+	 *            class to be searched for
 	 * @return a list of found getters
 	 */
 	public static List<Method> getClassSetters(Class<?> beanClass) {
@@ -187,8 +201,10 @@ public class ClassUtils {
 	/**
 	 * Return a first occurrence of a method annotated with specified annotation
 	 *
-	 * @param searchClass     class to be searched
-	 * @param annotationClass annotation class
+	 * @param searchClass
+	 *            class to be searched
+	 * @param annotationClass
+	 *            annotation class
 	 * @return annotated method or null
 	 */
 	public static Method findMethodWith(Class<?> searchClass, Class<? extends Annotation> annotationClass) {
@@ -209,15 +225,16 @@ public class ClassUtils {
 	/**
 	 * Create a new instance of a resource using a default constructor
 	 *
-	 * @param clazz new instance class
-	 * @param <T>   new instance class
+	 * @param clazz
+	 *            new instance class
+	 * @param <T>
+	 *            new instance class
 	 * @return new instance
 	 */
 	public static <T> T newInstance(Class<T> clazz) {
 		try {
 			return clazz.newInstance();
-		}
-		catch (InstantiationException | IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			throw new ResourceException(String.format("couldn't create a new instance of %s", clazz));
 		}
 	}
@@ -271,15 +288,14 @@ public class ClassUtils {
 	public static Class<?> getRawType(Type type) {
 		if (type instanceof Class) {
 			return (Class<?>) type;
-		}
-		else if (type instanceof ParameterizedType) {
+		} else if (type instanceof ParameterizedType) {
 			return getRawType(((ParameterizedType) type).getRawType());
-		}
-		else {
+		} else if (type instanceof TypeVariable) {
+			TypeVariable<?> typeVariable = (TypeVariable) type;
+			return getRawType(typeVariable.getBounds()[0]);
+		} else {
 			throw new IllegalStateException("unknown type: " + type);
 		}
 	}
-
-
 
 }

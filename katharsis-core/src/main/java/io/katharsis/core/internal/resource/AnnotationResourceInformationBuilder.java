@@ -59,7 +59,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		return resourceClass.getAnnotation(JsonApiResource.class) != null;
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@Override
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public ResourceInformation build(Class<?> resourceClass) {
 		List<AnnotatedResourceField> resourceFields = getResourceFields(resourceClass);
 
@@ -68,15 +69,18 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		Optional<JsonPropertyOrder> propertyOrder = ClassUtils.getAnnotation(resourceClass, JsonPropertyOrder.class);
 		if (propertyOrder.isPresent()) {
 			JsonPropertyOrder propertyOrderAnnotation = propertyOrder.get();
-			Collections.sort(resourceFields, new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
+			Collections.sort(resourceFields,
+					new FieldOrderedComparator(propertyOrderAnnotation.value(), propertyOrderAnnotation.alphabetic()));
 		}
 
 		DefaultResourceInstanceBuilder<?> instanceBuilder = new DefaultResourceInstanceBuilder(resourceClass);
 
 		Class<?> superclass = resourceClass.getSuperclass();
-		String superResourceType = superclass != Object.class && context.accept(superclass) ? context.getResourceType(superclass) : null;
-		
-		return new ResourceInformation(context.getTypeParser(), resourceClass, resourceType, superResourceType, instanceBuilder, (List) resourceFields);
+		String superResourceType = superclass != Object.class && context.accept(superclass)
+				? context.getResourceType(superclass) : null;
+
+		return new ResourceInformation(context.getTypeParser(), resourceClass, resourceType, superResourceType,
+				instanceBuilder, (List) resourceFields);
 	}
 
 	@Override
@@ -108,8 +112,10 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			String underlyingName = field.getName();
 			List<Annotation> annotations = Arrays.asList(field.getAnnotations());
 			ResourceFieldType resourceFieldType = AnnotatedResourceField.getResourceFieldType(annotations);
-			String oppositeResourceType = resourceFieldType == ResourceFieldType.RELATIONSHIP ? getResourceType(field.getGenericType(), context) : null;
-			AnnotatedResourceField resourceField = new AnnotatedResourceField(jsonName, underlyingName, field.getType(), field.getGenericType(), oppositeResourceType, annotations);
+			String oppositeResourceType = resourceFieldType == ResourceFieldType.RELATIONSHIP
+					? getResourceType(field.getGenericType(), context) : null;
+			AnnotatedResourceField resourceField = new AnnotatedResourceField(jsonName, underlyingName, field.getType(),
+					field.getGenericType(), oppositeResourceType, annotations);
 			if (Modifier.isTransient(field.getModifiers()) || Modifier.isStatic(field.getModifiers())) {
 				fieldWrappers.add(new ResourceFieldWrapper(resourceField, true));
 			} else {
@@ -135,8 +141,10 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			String underlyingName = resourceFieldNameTransformer.getMethodName(getter);
 			List<Annotation> annotations = Arrays.asList(getter.getAnnotations());
 			ResourceFieldType resourceFieldType = AnnotatedResourceField.getResourceFieldType(annotations);
-			String oppositeResourceType = resourceFieldType == ResourceFieldType.RELATIONSHIP ? getResourceType(getter.getGenericReturnType(), context) : null;
-			AnnotatedResourceField resourceField = new AnnotatedResourceField(jsonName, underlyingName, getter.getReturnType(), getter.getGenericReturnType(), oppositeResourceType, annotations);
+			String oppositeResourceType = resourceFieldType == ResourceFieldType.RELATIONSHIP
+					? getResourceType(getter.getGenericReturnType(), context) : null;
+			AnnotatedResourceField resourceField = new AnnotatedResourceField(jsonName, underlyingName,
+					getter.getReturnType(), getter.getGenericReturnType(), oppositeResourceType, annotations);
 			if (Modifier.isStatic(getter.getModifiers())) {
 				fieldWrappers.add(new ResourceFieldWrapper(resourceField, true));
 			} else {
@@ -146,12 +154,14 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		return fieldWrappers;
 	}
 
-	private List<AnnotatedResourceField> getResourceFields(List<ResourceFieldWrapper> resourceClassFields, List<ResourceFieldWrapper> resourceGetterFields) {
+	private List<AnnotatedResourceField> getResourceFields(List<ResourceFieldWrapper> resourceClassFields,
+			List<ResourceFieldWrapper> resourceGetterFields) {
 		Map<String, AnnotatedResourceField> resourceFieldMap = new HashMap<>();
 
 		for (ResourceFieldWrapper fieldWrapper : resourceClassFields) {
 			if (!fieldWrapper.isDiscarded())
-				resourceFieldMap.put(fieldWrapper.getResourceField().getUnderlyingName(), fieldWrapper.getResourceField());
+				resourceFieldMap.put(fieldWrapper.getResourceField().getUnderlyingName(),
+						fieldWrapper.getResourceField());
 		}
 
 		for (ResourceFieldWrapper fieldWrapper : resourceGetterFields) {
@@ -159,7 +169,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 				String originalName = fieldWrapper.getResourceField().getUnderlyingName();
 				AnnotatedResourceField field = fieldWrapper.getResourceField();
 				if (resourceFieldMap.containsKey(originalName)) {
-					resourceFieldMap.put(originalName, mergeAnnotations(resourceFieldMap.get(originalName), field, context));
+					resourceFieldMap.put(originalName,
+							mergeAnnotations(resourceFieldMap.get(originalName), field, context));
 				} else if (!hasDiscardedField(fieldWrapper, resourceClassFields)) {
 					resourceFieldMap.put(originalName, field);
 				}
@@ -180,23 +191,27 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		return resourceFields;
 	}
 
-	private static boolean hasDiscardedField(ResourceFieldWrapper fieldWrapper, List<ResourceFieldWrapper> resourceClassFields) {
+	private static boolean hasDiscardedField(ResourceFieldWrapper fieldWrapper,
+			List<ResourceFieldWrapper> resourceClassFields) {
 		for (ResourceFieldWrapper resourceFieldWrapper : resourceClassFields) {
-			if (fieldWrapper.getResourceField().getUnderlyingName().equals(resourceFieldWrapper.getResourceField().getUnderlyingName())) {
+			if (fieldWrapper.getResourceField().getUnderlyingName()
+					.equals(resourceFieldWrapper.getResourceField().getUnderlyingName())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	private static AnnotatedResourceField mergeAnnotations(AnnotatedResourceField fromField, AnnotatedResourceField fromMethod, ResourceInformationBuilderContext context) {
+	private static AnnotatedResourceField mergeAnnotations(AnnotatedResourceField fromField,
+			AnnotatedResourceField fromMethod, ResourceInformationBuilderContext context) {
 		List<Annotation> annotations = new ArrayList<>(fromField.getAnnotations());
 		annotations.addAll(fromMethod.getAnnotations());
 
 		Class<?> fieldType = mergeFieldType(fromField, fromMethod);
 		Type fieldGenericType = mergeGenericType(fromField, fromMethod);
 		String oppositeResourceType = getResourceType(fieldGenericType, context);
-		return new AnnotatedResourceField(fromField.getJsonName(), fromField.getUnderlyingName(), fieldType, fieldGenericType, oppositeResourceType, annotations);
+		return new AnnotatedResourceField(fromField.getJsonName(), fromField.getUnderlyingName(), fieldType,
+				fieldGenericType, oppositeResourceType, annotations);
 	}
 
 	private static Class<?> mergeFieldType(AnnotatedResourceField fromField, AnnotatedResourceField fromMethod) {
@@ -217,11 +232,11 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 
 	private static boolean hasKatharsisAnnotation(List<Annotation> annotations) {
 		for (Annotation annotation : annotations) {
-			if (annotation.annotationType() == JsonApiId.class
-					|| annotation.annotationType() == JsonApiRelation.class
+			if (annotation.annotationType() == JsonApiId.class || annotation.annotationType() == JsonApiRelation.class
 					|| annotation.annotationType() == JsonApiToOne.class
 					|| annotation.annotationType() == JsonApiToMany.class
-					|| annotation.annotationType() == JsonApiMetaInformation.class || annotation.annotationType() == JsonApiLinksInformation.class) {
+					|| annotation.annotationType() == JsonApiMetaInformation.class
+					|| annotation.annotationType() == JsonApiLinksInformation.class) {
 				return true;
 			}
 		}
@@ -250,8 +265,10 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 
 		private List<Annotation> annotations;
 
-		public AnnotatedResourceField(String jsonName, String underlyingName, Class<?> type, Type genericType, String oppositeResourceType, List<Annotation> annotations) {
-			super(jsonName, underlyingName, getResourceFieldType(annotations), type, genericType, oppositeResourceType, getOppositeName(annotations), isLazy(annotations), getIncludeByDefault(annotations),
+		public AnnotatedResourceField(String jsonName, String underlyingName, Class<?> type, Type genericType,
+				String oppositeResourceType, List<Annotation> annotations) {
+			super(jsonName, underlyingName, getResourceFieldType(annotations), type, genericType, oppositeResourceType,
+					getOppositeName(annotations), isLazy(annotations), getIncludeByDefault(annotations),
 					getLookupIncludeBehavior(annotations));
 			this.annotations = annotations;
 		}
@@ -288,7 +305,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			return getLookupIncludeBehavior(annotations, LookupIncludeBehavior.NONE);
 		}
 
-		public static LookupIncludeBehavior getLookupIncludeBehavior(Collection<Annotation> annotations, LookupIncludeBehavior defaultBehavior) {
+		public static LookupIncludeBehavior getLookupIncludeBehavior(Collection<Annotation> annotations,
+				LookupIncludeBehavior defaultBehavior) {
 			for (Annotation annotation : annotations) {
 				if (annotation instanceof JsonApiRelation) {
 					JsonApiRelation jsonApiRelation = (JsonApiRelation) annotation;
@@ -313,8 +331,10 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 		 * Returns a flag which indicate if a field should not be serialized
 		 * automatically.
 		 *
-		 * @param annotations  attribute annotations
-		 * @param defaultValue default value if it cannot be determined
+		 * @param annotations
+		 *            attribute annotations
+		 * @param defaultValue
+		 *            default value if it cannot be determined
 		 * @return is lazy
 		 */
 		public static boolean isLazy(Collection<Annotation> annotations, boolean defaultValue) {
@@ -340,14 +360,14 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			}
 			if (jsonApiRelation != null) {
 				switch (jsonApiRelation.serialize()) {
-					case LAZY:
-						return true;
-					case ONLY_ID:
-						return false;
-					case EAGER:
-						return false;
-					default:
-						throw new UnsupportedOperationException("Unknown serialize type " + jsonApiRelation.serialize());
+				case LAZY:
+					return true;
+				case ONLY_ID:
+					return false;
+				case EAGER:
+					return false;
+				default:
+					throw new UnsupportedOperationException("Unknown serialize type " + jsonApiRelation.serialize());
 				}
 			} else if (includeByDefaultAnnotation != null) {
 				return false;
@@ -363,7 +383,8 @@ public class AnnotationResourceInformationBuilder implements ResourceInformation
 			for (Annotation annotation : annotations) {
 				if (annotation instanceof JsonApiId) {
 					return ResourceFieldType.ID;
-				} else if (annotation instanceof JsonApiToOne || annotation instanceof JsonApiToMany || annotation instanceof JsonApiRelation) {
+				} else if (annotation instanceof JsonApiToOne || annotation instanceof JsonApiToMany
+						|| annotation instanceof JsonApiRelation) {
 					return ResourceFieldType.RELATIONSHIP;
 				} else if (annotation instanceof JsonApiMetaInformation) {
 					return ResourceFieldType.META_INFORMATION;
