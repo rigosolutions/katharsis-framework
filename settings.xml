@@ -20,7 +20,7 @@
 						<updatePolicy>never</updatePolicy>
 						<checksumPolicy>fail</checksumPolicy>
 					</snapshots>
-					<url>http://www.saddleup.io:8082/repository/maven-public/</url>
+					<url>http://174.138.112.242:8081/repository/maven-public/</url>
 					<layout>default</layout>
 				</repository>
 			</repositories>
