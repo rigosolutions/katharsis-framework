@@ -182,7 +182,7 @@
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>${maven-deploy-plugin.version}</version>
                     <configuration>
-                        <skip>true</skip>
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -307,14 +307,14 @@
 
             <distributionManagement>
                 <snapshotRepository>
-                    <id>sonatype-nexus-snapshots</id>
-                    <name>Sonatype Nexus Snapshots</name>
-                    <url>${sonatypeOssDistMgmtSnapshotsUrl}</url>
+                    <id>rigo</id>
+                    <name>Rigo Nexus Snapshots</name>
+                    <url>http://174.138.112.242:8081/repository/maven-snapshots/</url>
                 </snapshotRepository>
                 <repository>
-                    <id>sonatype-nexus-staging</id>
-                    <name>Nexus Release Repository</name>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>rigo</id>
+                    <name>Rigo Release Repository</name>
+                    <url>http://174.138.112.242:8081/repository/maven-releases/</url>
                 </repository>
             </distributionManagement>
         </profile>

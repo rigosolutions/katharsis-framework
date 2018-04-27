@@ -26,6 +26,13 @@
 			</repositories>
 		</profile>
 	</profiles>
+	<servers>
+		<server>
+			<id>rigo</id>
+			<username>${env.SONATYPE_USER}</username>
+			<password>${env.SONATYPE_PASSWORD}</password>
+		</server>
+	</servers>
 	<activeProfiles>
 		<activeProfile>rigo</activeProfile>
 	</activeProfiles>
